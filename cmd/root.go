@@ -2,33 +2,31 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/derhabicht/metoc/orchestration"
 	"os"
 
 	"github.com/spf13/cobra"
-
-	"github.com/derhabicht/metoc/orchestrations"
 )
 
 var (
 	tzOffset int
 
 	rootCmd = &cobra.Command{
-		Use:   "metoc",
+		Use:   "metoc <PLAN YAML> <OUTPUT TEX>",
 		Short: "Generate METOC reports for operational planning",
 		Long:  "",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			rg, err := orchestrations.NewReportGenerator(args[0])
+			rg, err := orchestration.NewReportGenerator(args[0])
 			if err != nil {
 				return err
 			}
 
-			out, err := rg.Generate()
+			err = rg.Generate(args[1])
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(out)
 			return nil
 		},
 	}

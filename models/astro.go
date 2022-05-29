@@ -27,9 +27,9 @@ type SunData struct {
 }
 
 type MoonData struct {
-	Phase LunarPhase
-	Rise  Dtg
-	Set   Dtg
+	Phase    LunarPhase
+	MoonRise Dtg
+	MoonSet  Dtg
 }
 
 type AstroData struct {

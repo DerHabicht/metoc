@@ -66,6 +66,17 @@ func (d Dtg) Time() string {
 	return d.datetime.Format(FormatAcp121Time)
 }
 
+func (d Dtg) IsoDate() string {
+	return d.datetime.Format("2006-01-02")
+}
+
+func DtgNow(tzoffset int) Dtg {
+	l := AcpLocation(tzoffset)
+	d := time.Now().In(l)
+
+	return Dtg{d}
+}
+
 func ParseDtg(dtg string) (Dtg, error) {
 	r := regexp.MustCompile(`(\d{4,6})([[:alpha:]]).*`)
 	match := r.FindStringSubmatch(dtg)
@@ -94,7 +105,7 @@ func ParseDtg(dtg string) (Dtg, error) {
 		// Try short
 		dt, err = time.ParseInLocation(ParseAcp121Short, d, l)
 		if err != nil {
-			return Dtg{}, errors.Errorf("failed to parse %s as an ACP DTG", dtg)
+			return Dtg{}, errors.WithMessagef(err, "failed to parse %s as an ACP DTG", dtg)
 		}
 
 		return Dtg{dt}, nil
@@ -102,19 +113,40 @@ func ParseDtg(dtg string) (Dtg, error) {
 
 	dt, err := time.Parse(Acp121Date, dtg)
 	if err != nil {
-		return Dtg{}, errors.Errorf("failed to parse %s as an ACP date", dtg)
+		return Dtg{}, errors.WithMessagef(err, "failed to parse %s as an ACP date", dtg)
 	}
 
 	return Dtg{dt}, nil
 }
 
-func ParseDtgFromISO(iso string) (Dtg, error) {
-	dt, err := time.Parse("2006-01-02T15:04Z", iso)
+func ParseIsoDateTimeToDtg(iso string, tzoffset int) (Dtg, error) {
+	location := AcpLocation(tzoffset)
+
+	dt, err := time.Parse(time.RFC3339, iso)
 	if err != nil {
-		dt, err = time.Parse("2006-01-02", iso)
-		if err != nil {
-			return Dtg{}, errors.Errorf("failed to parse %s as an ISO date", iso)
-		}
+		return Dtg{}, errors.WithMessagef(err, "failed to parse %s as an ISO date-time", iso)
+	}
+
+	localized := dt.In(location)
+
+	return Dtg{localized}, nil
+}
+
+func ParseIsoDateToDtg(iso string) (Dtg, error) {
+	dt, err := time.Parse("2006-01-02", iso)
+	if err != nil {
+		return Dtg{}, errors.WithMessagef(err, "failed to parse %s as an ISO date", iso)
+	}
+
+	return Dtg{dt}, nil
+}
+
+func ParseTimeToDtg(t string, tzoffset int) (Dtg, error) {
+	location := AcpLocation(tzoffset)
+
+	dt, err := time.ParseInLocation("15:04", t, location)
+	if err != nil {
+		return Dtg{}, errors.WithMessagef(err, "failed to parse %s as a time", t)
 	}
 
 	return Dtg{dt}, nil
