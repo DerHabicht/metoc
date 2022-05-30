@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/derhabicht/metoc/orchestration"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/derhabicht/metoc/orchestration"
 )
 
 var (
-	tzOffset int
-
 	rootCmd = &cobra.Command{
 		Use:   "metoc <PLAN YAML> <OUTPUT TEX>",
 		Short: "Generate METOC reports for operational planning",
@@ -32,8 +32,22 @@ var (
 	}
 )
 
+func initConfig() {
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	viper.AddConfigPath(home)
+	viper.SetConfigType("yaml")
+	viper.SetConfigName(".metoc")
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Sprintf("failed to read config %s", viper.ConfigFileUsed()))
+	}
+}
+
 func init() {
-	rootCmd.Flags().IntVar(&tzOffset, "tzoffset", 0, "Timezone offset for the report (default: 0)")
+	cobra.OnInitialize(initConfig)
 }
 
 func Execute() {

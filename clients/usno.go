@@ -15,34 +15,34 @@ const UsnoUrl = "https://aa.usno.navy.mil/api/rstt/oneday"
 
 type UsnoGeometry struct {
 	Coordinates []float64 `json:"coordinates"`
-	Type string `json:"type"`
+	Type        string    `json:"type"`
 }
 
 type UsnoClosestPhase struct {
-	Day int `json:"day"`
-	Month int `json:"month"`
+	Day   int    `json:"day"`
+	Month int    `json:"month"`
 	Phase string `json:"phase"`
-	Time string `json:"time"`
-	Year int `json:"year"`
+	Time  string `json:"time"`
+	Year  int    `json:"year"`
 }
 
 type UsnoPhenomenon struct {
 	Phenomenon string `json:"phen"`
-	Time string `json:"time"`
+	Time       string `json:"time"`
 }
 
 type UsnoData struct {
-	ClosestPhase UsnoClosestPhase `json:"closestphase"`
-	CurrentPhase string `json:"curphase"`
-	Day int `json:"day"`
-	DayOfWeek string `json:"day_of_week"`
-	Fracillum string `json:"fracillum"`
-	IsDst bool `json:"isdst"`
-	Month int `json:"month"`
-	MoonData []UsnoPhenomenon `json:"moondata"`
-	SunData []UsnoPhenomenon `json:"sundata"`
-	TimezoneOffset float64 `json:"tz"`
-	Year int `json:"year"`
+	ClosestPhase   UsnoClosestPhase `json:"closestphase"`
+	CurrentPhase   string           `json:"curphase"`
+	Day            int              `json:"day"`
+	DayOfWeek      string           `json:"day_of_week"`
+	Fracillum      string           `json:"fracillum"`
+	IsDst          bool             `json:"isdst"`
+	Month          int              `json:"month"`
+	MoonData       []UsnoPhenomenon `json:"moondata"`
+	SunData        []UsnoPhenomenon `json:"sundata"`
+	TimezoneOffset float64          `json:"tz"`
+	Year           int              `json:"year"`
 }
 
 type UsnoProperties struct {
@@ -50,10 +50,10 @@ type UsnoProperties struct {
 }
 
 type UsnoResponse struct {
-	ApiVersion string `json:"apiversion"`
-	Geometry UsnoGeometry `json:"geometry"`
+	ApiVersion string         `json:"apiversion"`
+	Geometry   UsnoGeometry   `json:"geometry"`
 	Properties UsnoProperties `json:"properties"`
-	Type string `json:"type"`
+	Type       string         `json:"type"`
 }
 
 func FetchUsnoData(location models.Location, date models.Dtg, tzoffset int) (UsnoResponse, error) {

@@ -10,6 +10,7 @@ const Template = `\documentclass[10pt]{article}
 
 \usepackage{booktabs}
 \usepackage[margin=0.5in]{geometry}
+\usepackage{textcomp}
 
 \renewcommand{\familydefault}{\ttdefault}
 \setlength{\parindent}{0pt}
@@ -36,6 +37,9 @@ const LocationDataTemplate = `
 	%{ASTRO_DATA_ROWS}
 \bottomrule
 \end{tabular}
+
+\subsubsection*{Weather Forecast}
+%{WX_DATA}
 `
 
 const AstroDataTemplate = `
@@ -53,19 +57,39 @@ const AstroDataTemplate = `
 	%{MS} \\
 `
 
+const WxDataTemplate = `
+\begin{tabular}{ll}
+\toprule
+	Date               &  %{DATE} \\
+	Conditions         &  %{CONDITIONS} \\
+	Description        &  %{DESCRIPTION} \\
+	High               &  %{HIGH_TEMP} \\
+	Low                &  %{LOW_TEMP} \\
+	Heat Risk          &  %{HEAT_RISK} \\
+	Cold Risk          &  %{COLD_RISK} \\
+\bottomrule
+\end{tabular}
+
+\begin{verbatim}
+%{FORECAST_DETAIL}
+\end{verbatim}
+
+\vspace{1em}
+`
+
 type LatexView struct {
-	generated models.Dtg
-	locations map[string]string
+	generated     models.Dtg
+	locations     map[string]string
 	astroDataRows map[string]string
-	wxDataRows map[string]string
+	wxDataRows    map[string]string
 }
 
 func NewLatexView(generated models.Dtg) LatexView {
 	return LatexView{
-		generated: generated,
-		locations: make(map[string]string),
+		generated:     generated,
+		locations:     make(map[string]string),
 		astroDataRows: make(map[string]string),
-		wxDataRows: make(map[string]string),
+		wxDataRows:    make(map[string]string),
 	}
 }
 
@@ -94,6 +118,21 @@ func (lv *LatexView) AddAstroData(locationKey string, date models.Dtg, data mode
 	lv.astroDataRows[locationKey] += row
 }
 
+func (lv *LatexView) AddWxData(locationKey string, date models.Dtg, data models.DailyForecast, apf string) {
+	row := WxDataTemplate
+
+	row = strings.Replace(row, "%{DATE}", date.Date(), -1)
+	row = strings.Replace(row, "%{CONDITIONS}", data.Conditions, -1)
+	row = strings.Replace(row, "%{DESCRIPTION}", data.Description, -1)
+	row = strings.Replace(row, "%{HIGH_TEMP}", fmt.Sprintf("%.1f\\textdegree{}C", data.HighTemp), -1)
+	row = strings.Replace(row, "%{LOW_TEMP}", fmt.Sprintf("%.1f\\textdegree{}C", data.LowTemp), -1)
+	row = strings.Replace(row, "%{HEAT_RISK}", string(models.CalculateHeatCategory(data.FeelsLikeMax)), -1)
+	row = strings.Replace(row, "%{COLD_RISK}", string(models.CalculateColdCategory(data.FeelsLikeMin)), -1)
+	row = strings.Replace(row, "%{FORECAST_DETAIL}", apf, -1)
+
+	lv.wxDataRows[locationKey] += row
+}
+
 func (lv LatexView) Build() string {
 	loc := ""
 
@@ -101,6 +140,7 @@ func (lv LatexView) Build() string {
 		locStr := LocationDataTemplate
 		locStr = strings.Replace(locStr, "%{LOCATION_NAME}", v, -1)
 		locStr = strings.Replace(locStr, "%{ASTRO_DATA_ROWS}", lv.astroDataRows[k], -1)
+		locStr = strings.Replace(locStr, "%{WX_DATA}", lv.wxDataRows[k], -1)
 
 		loc += locStr
 	}

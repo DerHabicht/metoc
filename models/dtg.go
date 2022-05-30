@@ -70,6 +70,14 @@ func (d Dtg) IsoDate() string {
 	return d.datetime.Format("2006-01-02")
 }
 
+func (d Dtg) Hour() int {
+	return d.datetime.Hour()
+}
+
+func (d Dtg) Unix() int64 {
+	return d.datetime.Unix()
+}
+
 func DtgNow(tzoffset int) Dtg {
 	l := AcpLocation(tzoffset)
 	d := time.Now().In(l)
@@ -124,7 +132,10 @@ func ParseIsoDateTimeToDtg(iso string, tzoffset int) (Dtg, error) {
 
 	dt, err := time.Parse(time.RFC3339, iso)
 	if err != nil {
-		return Dtg{}, errors.WithMessagef(err, "failed to parse %s as an ISO date-time", iso)
+		dt, err = time.Parse("2006-01-02T15:04:05", iso)
+		if err != nil {
+			return Dtg{}, errors.WithMessagef(err, "failed to parse %s as an ISO date-time", iso)
+		}
 	}
 
 	localized := dt.In(location)
@@ -144,9 +155,14 @@ func ParseIsoDateToDtg(iso string) (Dtg, error) {
 func ParseTimeToDtg(t string, tzoffset int) (Dtg, error) {
 	location := AcpLocation(tzoffset)
 
-	dt, err := time.ParseInLocation("15:04", t, location)
+	var dt time.Time
+
+	dt, err := time.ParseInLocation("15:04:05", t, location)
 	if err != nil {
-		return Dtg{}, errors.WithMessagef(err, "failed to parse %s as a time", t)
+		dt, err = time.ParseInLocation("15:04", t, location)
+		if err != nil {
+			return Dtg{}, errors.WithMessagef(err, "failed to parse %s as a time", t)
+		}
 	}
 
 	return Dtg{dt}, nil

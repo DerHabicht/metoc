@@ -55,18 +55,18 @@ func FetchSunData(location models.Location, date models.Dtg, tzoffset int) (mode
 
 	return models.SunData{
 		Sunrise: sunrise,
-		Sunset: sunset,
+		Sunset:  sunset,
 		AstronomicalTwilight: models.Twilight{
 			Begin: beginAt,
-			End: endAt,
+			End:   endAt,
 		},
 		NauticalTwilight: models.Twilight{
 			Begin: beginNt,
-			End: endNt,
+			End:   endNt,
 		},
 		CivilTwilight: models.Twilight{
 			Begin: beginCt,
-			End: endCt,
+			End:   endCt,
 		},
 	}, nil
 }

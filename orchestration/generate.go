@@ -80,8 +80,15 @@ func (rg ReportGenerator) Generate(outfile string) error {
 			return errors.WithStack(err)
 		}
 
+		err = controllers.FetchWeatherDataForReport(&report)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
 		for _, date := range report.Dates {
-			lv.AddAstroData(report.Location.Mgrs(),	date, report.AstroData[date])
+			lv.AddAstroData(report.Location.Mgrs(), date, report.AstroData[date])
+			apf := views.EncodeDailyForecast(report.Forecast[date], report.Location, report.Generated)
+			lv.AddWxData(report.Location.Mgrs(), date, report.Forecast[date], apf)
 		}
 	}
 
