@@ -14,7 +14,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "metoc <PLAN YAML> <OUTPUT TEX>",
 		Short: "Generate METOC reports for operational planning",
-		Long:  "",
+		Long:  "METOC v1.0.0",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			rg, err := orchestration.NewReportGenerator(args[0])
